@@ -605,7 +605,7 @@ class energysaver extends eqLogic {
     			$eqLogic->executeAction($action);
     		}
     	}
-      	$this->refreshWidget();
+      	//$this->refreshWidget(); bug $this
     }
     
 
