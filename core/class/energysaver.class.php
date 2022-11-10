@@ -586,15 +586,15 @@ class energysaver extends eqLogic {
     }
     
     // Action sur l'équipement principal (main)
-    $eqLogic = eqLogic::byLogicalId('main', 'energysaver');
+    $eqLogicMain = eqLogic::byLogicalId('main', 'energysaver');
     if ($action == 'stop') {
       	log::add(__CLASS__, 'debug', 'Main Stop');
-      	$eqLogic->checkAndUpdateCmd('state', 1); 
+      	$eqLogicMain->checkAndUpdateCmd('state', 1); 
     } 
     
     if ($action == 'start') {
       	log::add(__CLASS__, 'debug', 'Main Start');
-    	$eqLogic->checkAndUpdateCmd('state', 0);  
+    	$eqLogicMain->checkAndUpdateCmd('state', 0);  
     }
     
     // Action sur les équipements gérés par le plugin
@@ -605,7 +605,8 @@ class energysaver extends eqLogic {
     			$eqLogic->executeAction($action);
     		}
     	}
-      	//$this->refreshWidget(); bug $this
+      
+      	$eqLogicMain->refreshWidget();
     }
     
 
