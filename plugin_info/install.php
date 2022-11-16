@@ -24,6 +24,9 @@ function energysaver_install() {
 
 // Fonction exécutée automatiquement après la mise à jour du plugin
 function energysaver_update() {
+  energysaver::createMainEquipement();   
+  energysaver::updatePluginMultiSchedule(); // Mise à jour pour passage à plusieurs planifications
+  energysaver::postSave();
 }
 
 // Fonction exécutée automatiquement après la suppression du plugin

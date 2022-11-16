@@ -22,10 +22,17 @@ if (!isConnect()) {
   die();
 }
 ?>
-<form class="form-horizontal">
+<form class="form-horizontal">  
   <fieldset>
+    <div class="form-group">
+    	<label class="col-sm-4 control-label" >{{Eteindre un équipement qui a été rallumé durant la planification (1 fois)}}</label>
+    	<div class="col-sm-6">
+    		<input type="checkbox" class="configKey eqLogicAttr" data-l1key="cfg_forceOff">
+    	</div>
+    </div>
+  
   	<div class="form-group">
-  		<label class="col-md-4 control-label"></label>
+  		<label class="col-md-4 control-label" style="color: #337ab7">{{Planification n°1}}</label>
   		<div class="col-md-1"><center>{{Heure}}</center></div>
   		<div class="col-md-1"><center>{{Minute}}</center></div>
   	</div>  
@@ -54,7 +61,7 @@ if (!isConnect()) {
           <?php
           	for ($i = 0; $i < 60 ; $i=$i+5) {
             	if ($i < 10) {
-                	$j = $i.'0';
+                	$j = '0'.$i;
                 } else {
                 	$j = $i;
                 }
@@ -90,7 +97,7 @@ if (!isConnect()) {
           <?php
           	for ($i = 0; $i < 60 ; $i=$i+5) {
             	if ($i < 10) {
-                	$j = $i.'0';
+                	$j = '0'.$i;
                 } else {
                 	$j = $i;
                 }
@@ -102,4 +109,167 @@ if (!isConnect()) {
       </div>
     </div>
   </fieldset>
+            
+  <fieldset>
+  	<div class="form-group">
+  		<label class="col-md-4 control-label" style="color: #337ab7">{{Planification n°2}}</label>
+  		<div class="col-md-1"><center>{{Heure}}</center></div>
+  		<div class="col-md-1"><center>{{Minute}}</center></div>
+  	</div>  
+    <div class="form-group">
+      <label class="col-md-4 control-label">{{Arrêt des équipements}}
+        <sup><i class="fas fa-question-circle tooltips" title="{{Heure/Minutes d'arrêt des équipements}}"></i></sup>
+      </label>
+      <div class="col-md-1">  
+        <select class="configKey form-control" data-l1key="cfg_h2_stop"/>
+          <option value=""></option>
+          <?php
+          	for ($i = 0; $i < 24 ; $i++) {
+                if ($i < 10) {
+                	$j = '0'.$i;
+                } else {
+                	$j = $i;
+                }
+            	echo '<option value="'.$j.'">'.$j.'</option>';
+            }
+          ?>
+        </select>
+      </div>
+      <div class="col-md-1">
+        <select class="configKey form-control" data-l1key="cfg_m2_stop"/>
+          <option value=""></option>
+          <?php
+          	for ($i = 0; $i < 60 ; $i=$i+5) {
+            	if ($i < 10) {
+                	$j = '0'.$i;
+                } else {
+                	$j = $i;
+                }
+            	
+            	echo '<option value="'.$j.'">'.$j.'</option>';
+            }
+          ?>
+        </select>
+      </div>
+    </div>
+    <div class="form-group">
+      <label class="col-md-4 control-label">{{Mise en service des équipements}}
+        <sup><i class="fas fa-question-circle tooltips" title="{{Heure/Minutes de mise en service des équipements}}"></i></sup>
+      </label>
+      <div class="col-md-1">
+        <select class="configKey form-control" data-l1key="cfg_h2_start"/>
+          <option value=""></option>
+          <?php
+          	for ($i = 0; $i < 24 ; $i++) {
+                if ($i < 10) {
+                	$j = '0'.$i;
+                } else {
+                	$j = $i;
+                }
+            	echo '<option value="'.$j.'">'.$j.'</option>';
+            }
+          ?>
+        </select>
+      </div>
+      <div class="col-md-1">
+        <select class="configKey form-control" data-l1key="cfg_m2_start"/>
+          <option value=""></option>
+          <?php
+          	for ($i = 0; $i < 60 ; $i=$i+5) {
+            	if ($i < 10) {
+                	$j = '0'.$i;
+                } else {
+                	$j = $i;
+                }
+            	
+            	echo '<option value="'.$j.'">'.$j.'</option>';
+            }
+          ?>
+        </select>
+      </div>
+    </div>
+  </fieldset>
+
+            
+  <fieldset>
+  	<div class="form-group">
+  		<label class="col-md-4 control-label" style="color: #337ab7">{{Planification n°3}}</label>
+  		<div class="col-md-1"><center>{{Heure}}</center></div>
+  		<div class="col-md-1"><center>{{Minute}}</center></div>
+  	</div>  
+    <div class="form-group">
+      <label class="col-md-4 control-label">{{Arrêt des équipements}}
+        <sup><i class="fas fa-question-circle tooltips" title="{{Heure/Minutes d'arrêt des équipements}}"></i></sup>
+      </label>
+      <div class="col-md-1">  
+        <select class="configKey form-control" data-l1key="cfg_h3_stop"/>
+          <option value=""></option>
+          <?php
+          	for ($i = 0; $i < 24 ; $i++) {
+                if ($i < 10) {
+                	$j = '0'.$i;
+                } else {
+                	$j = $i;
+                }
+            	echo '<option value="'.$j.'">'.$j.'</option>';
+            }
+          ?>
+        </select>
+      </div>
+      <div class="col-md-1">
+        <select class="configKey form-control" data-l1key="cfg_m3_stop"/>
+          <option value=""></option>
+          <?php
+          	for ($i = 0; $i < 60 ; $i=$i+5) {
+            	if ($i < 10) {
+                	$j = '0'.$i;
+                } else {
+                	$j = $i;
+                }
+            	
+            	echo '<option value="'.$j.'">'.$j.'</option>';
+            }
+          ?>
+        </select>
+      </div>
+    </div>
+    <div class="form-group">
+      <label class="col-md-4 control-label">{{Mise en service des équipements}}
+        <sup><i class="fas fa-question-circle tooltips" title="{{Heure/Minutes de mise en service des équipements}}"></i></sup>
+      </label>
+      <div class="col-md-1">
+        <select class="configKey form-control" data-l1key="cfg_h3_start"/>
+          <option value=""></option>
+          <?php
+          	for ($i = 0; $i < 24 ; $i++) {
+                if ($i < 10) {
+                	$j = '0'.$i;
+                } else {
+                	$j = $i;
+                }
+            	echo '<option value="'.$j.'">'.$j.'</option>';
+            }
+          ?>
+        </select>
+      </div>
+      <div class="col-md-1">
+        <select class="configKey form-control" data-l1key="cfg_m3_start"/>
+          <option value=""></option>
+          <?php
+          	for ($i = 0; $i < 60 ; $i=$i+5) {
+            	if ($i < 10) {
+                	$j = '0'.$i;
+                } else {
+                	$j = $i;
+                }
+            	
+            	echo '<option value="'.$j.'">'.$j.'</option>';
+            }
+          ?>
+        </select>
+      </div>
+    </div>
+  </fieldset>
+            
+            
 </form>
