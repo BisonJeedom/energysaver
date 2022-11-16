@@ -20,23 +20,32 @@ if (!isConnect('admin')) {
     throw new Exception('{{401 - Accès non autorisé}}');
 }
 ?>
-  
-
 
 
 <div class="col-md-12">
     <div class="panel panel-primary">
         <div class="panel-heading">
-            <h3 class="panel-title"><center>Equipements ayant une commande On et Off</center>
+            <h3 class="panel-title"><center>Equipements elligibles car des commandes On et Off ont été trouvés</center>
               <a id="btSave" class="btn btn-success btn-xs pull-right" style="top: -2px !important; right: -6px !important;"><i class="far fa-check-circle icon-white"></i> {{Sauvegarder}}</a>
             </h3>
   			<h3 class="panel-title">
   			<?php
-  			    $cfg_h1_stop = config::byKey('cfg_h1_stop', 'energysaver'); // Récupération du paramètre global cfg_h1_stop
-    			$cfg_m1_stop = config::byKey('cfg_m1_stop', 'energysaver'); // Récupération du paramètre global cfg_m1_stop    
-    			$cfg_h1_start = config::byKey('cfg_h1_start', 'energysaver'); // Récupération du paramètre global cfg_h1_start
-    			$cfg_m1_start = config::byKey('cfg_m1_start', 'energysaver'); // Récupération du paramètre global cfg_m1_start
-				echo 'Paramétrage actuel : Energy Saver entre '.$cfg_h1_stop.'h'.$cfg_m1_stop.' et '.$cfg_h1_start.'h'.$cfg_m1_start;
+  				$cfg_planifications = energysaver::getStopStartParameters('h');
+				echo 'Planifications paramétrées dans la configuration : ';
+				for ($i = 1; $i <= 3; $i++) {
+					$hstop  = $cfg_planifications['stop'][$i];
+                	$hstart = $cfg_planifications['start'][$i];
+                  
+                  	if ($hstop == '' || $hstart == '') {
+                    	echo '<br>'.'['.$i.'] '.' Aucune planification';  
+                    } else {
+                  		echo '<br>'.'['.$i.'] '.' Entre '.$hstop.' et '.$hstart;
+                    }
+                  
+                  	if ($i == 1) {
+                      echo ' (par défaut pour les calculs)';
+                    }
+                }
   			?>
             </h3>
 
@@ -45,15 +54,15 @@ if (!isConnect('admin')) {
             <table class="table-bordered table-condensed" style="width: 100%; margin: -5px -5px 10px 5px;">
                 <thead>
                     <tr >
-  						<th style="text-align: center; width:30px;">Prendre en charge ?</th>
+  						<th style="width:30px;">Planification</th>
   						<th style="text-align: center; width:30px;">{{Etat dans le plugin}}</th>
  						<th style="width:30px;">{{Id}}</th>
                         <th style="width:30px;">{{Plugin}}</th>
                         <th style="width:180px;">{{Equipement}}</span></th>
               			<th style="width:50px;">{{Consommation depuis la mise en service}}</span></th>
                         <th style="width:50px;">{{Puissance Instantanée}}</span></th>                        
-                		<th style="width:50px;">{{Cosommation sur les 30 derniers jours pendant la période paramétrée}}</span></th>
-  						<th style="width:50px;">{{Durée de fonctionnement sur les 30 derniers jours pendant la période paramétrée}}</span></th>
+                		<th style="width:50px;">{{Consommation sur les 30 derniers jours pendant la période planifiéé}}</span></th>
+  						<th style="width:50px;">{{Durée de fonctionnement sur les 30 derniers jours pendant la période planifiéé}}</span></th>
                     </tr>
                 </thead>
                 <tbody>
@@ -93,18 +102,22 @@ if (!isConnect('admin')) {
                        
                         // Equipement déjà géré dans le plugin (crée actif ou pas) ?
                         $eqLogic_id = $eqLogic->getId();
-                        $isManaged = energysaver::isManaged($eqLogic_id); // 1 : Yes Enable ; 2 : Yes Disable ; 0 : No
-                        if ($isManaged == 1) {
+                        $schedule = energysaver::getschedule($eqLogic_id); // Récupération de la planification
+                        //$isManaged = energysaver::isManaged($eqLogic_id); // 1 : Yes Enable ; 2 : Yes Disable ; 0 : No
+                        
+                        if ($schedule > 0) { // A une planification
                           $color = 'green';
-                        } elseif ($isManaged == 2) {
-                          $color = 'grey';
-                        } else {
+                        } elseif ($schedule == -2) { // Aucun équipement
                           $color = 'red';
+                        } else {
+                          $color = 'grey'; // Existe mais désactivé (old) ou sans planification
                         }
+                       
+ 
                         //log::add('energysaver', 'debug', 'isManaged ok');
                         
                         // Modification de la couleur de la ligne pour appuyer sur le fait qu'il faudrait prendre en charge l'équipempent
-                        if ($isManaged != 1 && $cmd_power_value != 'Introuvable' && $cmd_consumption_value != 'Introuvable' && $cmd_state_duration30 != 'Introuvable' && $cmd_state_duration_30 != 'Non historisée' && $cmd_state_duration_30 != 'Aucune activité') {
+                        if ($schedule < 0 && $cmd_power_value != 'Introuvable' && $cmd_consumption_value != 'Introuvable' && $cmd_state_duration30 != 'Introuvable' && $cmd_state_duration_30 != 'Non historisée' && $cmd_state_duration_30 != 'Aucune activité') {
                           $line_color ='rgba(98, 21, 21, 0.6) !important';
                         } else {
                           $line_color = 'var(--bg-modal-color) !important;';
@@ -113,10 +126,32 @@ if (!isConnect('admin')) {
                         
                         echo '<tr style="background-color: '.$line_color.'">'
                         //echo '<tr>'
-                          . '<td style="text-align:center; height:34px !important;"><input type="checkbox" id="checked_input_' . $num++  . '" data-id="' . $eqLogic_id . '" style="border: 1px solid var(--link-color) !important;" class="form-control"';
-                        if ($isManaged != 0) { echo 'checked'; }
-                        echo '></td>'
-                          . '<td><center>'. energysaver::drawCircle("15px", $color) . '</center></td>'
+                          //. '<td style="text-align:center; height:34px !important;"><input type="checkbox" id="checked_input_' . $num++  . '" data-id="' . $eqLogic_id . '" style="border: 1px solid var(--link-color) !important;" class="form-control"';
+                          . '<td >'
+                          . '<select style="width:auto; height: 30px;" id="checked_input_' . $num++  . '" data-id="' . $eqLogic_id . '" >';                     
+                                      
+                       	for ($i = 0; $i <= 3; $i++) {
+                          	$hstop  = $cfg_planifications['stop'][$i];
+                			$hstart = $cfg_planifications['start'][$i];
+                          
+                          	$value = $i;
+                          	if ($value == 0) {
+                            	$text = 'Aucune planification';
+                            } else {
+                            	$text = '['.$i.'] '.$hstop.' -> '.$hstart;
+                            }
+                          	if ($value == $schedule) {
+                              $selected_schedule = 'selected';
+                            } else {
+                            	$selected_schedule = '';  
+                            }
+                        	echo '<option value="'.$value.'" '.$selected_schedule.'>'.$text.'</option>';  
+                          
+                        }
+                        
+                        echo '</select>'
+                        	.'</td>'                          
+                          	. '<td><center>'. energysaver::drawCircle("15px", $color) . '</center></td>'
                             . '<td>' . $eqLogic_id . '</td>'
                             . '<td>' . $plugin_id . '</td>'
                             . '<td>' . $eqLogic->getName() . '</span></td>'
