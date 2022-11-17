@@ -27,7 +27,7 @@ if (!isConnect()) {
     <div class="form-group">
     	<label class="col-sm-4 control-label" >{{Eteindre un équipement qui a été rallumé durant la planification (1 fois)}}</label>
     	<div class="col-sm-6">
-    		<input type="checkbox" class="configKey eqLogicAttr" data-l1key="cfg_forceOff">
+    		<input type="checkbox" class="configKey eqLogicAttr" data-l1key="cfg_forceOff" >
     	</div>
     </div>
   
@@ -35,13 +35,17 @@ if (!isConnect()) {
   		<label class="col-md-4 control-label" style="color: #337ab7">{{Planification n°1}}</label>
   		<div class="col-md-1"><center>{{Heure}}</center></div>
   		<div class="col-md-1"><center>{{Minute}}</center></div>
+  		<div class="col-md-2"><center>{{Mode déclencheur}}</center></div>
+  		<div class="col-md-2">
+  			<input type="checkbox" onchange="modetrigger()" class="configKey eqLogicAttr" data-l1key="cfg_modetrigger_1" id="modetrigger_1" />
+		</div>  
   	</div>  
     <div class="form-group">
       <label class="col-md-4 control-label">{{Arrêt des équipements}}
         <sup><i class="fas fa-question-circle tooltips" title="{{Heure/Minutes d'arrêt des équipements}}"></i></sup>
       </label>
       <div class="col-md-1">  
-        <select class="configKey form-control" data-l1key="cfg_h1_stop"/>
+        <select class="configKey form-control" data-l1key="cfg_h1_stop" id="select_h1_stop" />
           <option value=""></option>
           <?php
           	for ($i = 0; $i < 24 ; $i++) {
@@ -56,7 +60,7 @@ if (!isConnect()) {
         </select>
       </div>
       <div class="col-md-1">
-        <select class="configKey form-control" data-l1key="cfg_m1_stop"/>
+        <select class="configKey form-control" data-l1key="cfg_m1_stop" id="select_m1_stop" />
           <option value=""></option>
           <?php
           	for ($i = 0; $i < 60 ; $i=$i+5) {
@@ -77,7 +81,7 @@ if (!isConnect()) {
         <sup><i class="fas fa-question-circle tooltips" title="{{Heure/Minutes de mise en service des équipements}}"></i></sup>
       </label>
       <div class="col-md-1">
-        <select class="configKey form-control" data-l1key="cfg_h1_start"/>
+        <select class="configKey form-control" data-l1key="cfg_h1_start" id="select_h1_start" />
           <option value=""></option>
           <?php
           	for ($i = 0; $i < 24 ; $i++) {
@@ -92,7 +96,7 @@ if (!isConnect()) {
         </select>
       </div>
       <div class="col-md-1">
-        <select class="configKey form-control" data-l1key="cfg_m1_start"/>
+        <select class="configKey form-control" data-l1key="cfg_m1_start" id="select_m1_start" />
           <option value=""></option>
           <?php
           	for ($i = 0; $i < 60 ; $i=$i+5) {
@@ -115,13 +119,17 @@ if (!isConnect()) {
   		<label class="col-md-4 control-label" style="color: #337ab7">{{Planification n°2}}</label>
   		<div class="col-md-1"><center>{{Heure}}</center></div>
   		<div class="col-md-1"><center>{{Minute}}</center></div>
+        <div class="col-md-2"><center>{{Mode déclencheur}}</center></div>
+  		<div class="col-md-2">
+  			<input type="checkbox" onchange="modetrigger()" class="configKey eqLogicAttr" data-l1key="cfg_modetrigger_2" id="modetrigger_2" id="modetrigger_2" />
+		</div>
   	</div>  
     <div class="form-group">
       <label class="col-md-4 control-label">{{Arrêt des équipements}}
         <sup><i class="fas fa-question-circle tooltips" title="{{Heure/Minutes d'arrêt des équipements}}"></i></sup>
       </label>
       <div class="col-md-1">  
-        <select class="configKey form-control" data-l1key="cfg_h2_stop"/>
+        <select class="configKey form-control" data-l1key="cfg_h2_stop" id="select_h2_stop" />
           <option value=""></option>
           <?php
           	for ($i = 0; $i < 24 ; $i++) {
@@ -136,7 +144,7 @@ if (!isConnect()) {
         </select>
       </div>
       <div class="col-md-1">
-        <select class="configKey form-control" data-l1key="cfg_m2_stop"/>
+        <select class="configKey form-control" data-l1key="cfg_m2_stop" id="select_m2_stop" />
           <option value=""></option>
           <?php
           	for ($i = 0; $i < 60 ; $i=$i+5) {
@@ -157,7 +165,7 @@ if (!isConnect()) {
         <sup><i class="fas fa-question-circle tooltips" title="{{Heure/Minutes de mise en service des équipements}}"></i></sup>
       </label>
       <div class="col-md-1">
-        <select class="configKey form-control" data-l1key="cfg_h2_start"/>
+        <select class="configKey form-control" data-l1key="cfg_h2_start" id="select_h2_start" />
           <option value=""></option>
           <?php
           	for ($i = 0; $i < 24 ; $i++) {
@@ -172,7 +180,7 @@ if (!isConnect()) {
         </select>
       </div>
       <div class="col-md-1">
-        <select class="configKey form-control" data-l1key="cfg_m2_start"/>
+        <select class="configKey form-control" data-l1key="cfg_m2_start" id="select_m2_start" />
           <option value=""></option>
           <?php
           	for ($i = 0; $i < 60 ; $i=$i+5) {
@@ -196,13 +204,17 @@ if (!isConnect()) {
   		<label class="col-md-4 control-label" style="color: #337ab7">{{Planification n°3}}</label>
   		<div class="col-md-1"><center>{{Heure}}</center></div>
   		<div class="col-md-1"><center>{{Minute}}</center></div>
+        <div class="col-md-2"><center>{{Mode déclencheur}}</center></div>
+  		<div class="col-md-2">
+  			<input type="checkbox" onchange="modetrigger()" class="configKey eqLogicAttr" data-l1key="cfg_modetrigger_3" id="modetrigger_3" id="modetrigger_3" />
+		</div>
   	</div>  
     <div class="form-group">
       <label class="col-md-4 control-label">{{Arrêt des équipements}}
         <sup><i class="fas fa-question-circle tooltips" title="{{Heure/Minutes d'arrêt des équipements}}"></i></sup>
       </label>
       <div class="col-md-1">  
-        <select class="configKey form-control" data-l1key="cfg_h3_stop"/>
+        <select class="configKey form-control" data-l1key="cfg_h3_stop " id="select_h3_stop" />
           <option value=""></option>
           <?php
           	for ($i = 0; $i < 24 ; $i++) {
@@ -217,7 +229,7 @@ if (!isConnect()) {
         </select>
       </div>
       <div class="col-md-1">
-        <select class="configKey form-control" data-l1key="cfg_m3_stop"/>
+        <select class="configKey form-control" data-l1key="cfg_m3_stop" id="select_m3_stop" />
           <option value=""></option>
           <?php
           	for ($i = 0; $i < 60 ; $i=$i+5) {
@@ -238,7 +250,7 @@ if (!isConnect()) {
         <sup><i class="fas fa-question-circle tooltips" title="{{Heure/Minutes de mise en service des équipements}}"></i></sup>
       </label>
       <div class="col-md-1">
-        <select class="configKey form-control" data-l1key="cfg_h3_start"/>
+        <select class="configKey form-control" data-l1key="cfg_h3_start" id="select_h3_start" />
           <option value=""></option>
           <?php
           	for ($i = 0; $i < 24 ; $i++) {
@@ -253,7 +265,7 @@ if (!isConnect()) {
         </select>
       </div>
       <div class="col-md-1">
-        <select class="configKey form-control" data-l1key="cfg_m3_start"/>
+        <select class="configKey form-control" data-l1key="cfg_m3_start" id="select_m3_start" />
           <option value=""></option>
           <?php
           	for ($i = 0; $i < 60 ; $i=$i+5) {
@@ -273,3 +285,5 @@ if (!isConnect()) {
             
             
 </form>
+
+<?php include_file('desktop', 'energysaver.configuration', 'js', 'energysaver'); ?>
