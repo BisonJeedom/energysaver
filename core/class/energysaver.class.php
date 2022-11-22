@@ -48,13 +48,18 @@ class energysaver extends eqLogic {
    	foreach (eqLogic::byType('energysaver') as $eqLogic) {
       if ($eqLogic->getLogicalId() != 'main') {
         $count_total++;
-      	if ($eqLogic->getIsEnable()) {
-      		$count_enable++;          
+      	//if ($eqLogic->getIsEnable()) {
+        $cmd = $eqLogic->getCmd(null, 'Schedule'); // Récupération de la commande Schedule
+      	if (is_object($cmd)) {
+          	$schedule = $cmd->execCmd();
+          	if ($schedule != 0) { // Si existe une planification
+      			$count_schedule++;
+        	}
         }
       }
     }
     $array['total'] = $count_total;
-    $array['enable'] = $count_enable;
+    $array['schedule'] = $count_schedule;
     
     return $array; 
   }
@@ -126,6 +131,8 @@ class energysaver extends eqLogic {
 
   
   public static function getStateDuration($_eqLogic, $_value) {
+    
+
 
     $eqLogic_id = $_eqLogic->getId();
     $schedule = energysaver::getschedule($eqLogic_id); // Récupération de la planification	
@@ -138,6 +145,10 @@ class energysaver extends eqLogic {
     
     if (is_object($_cmd)) {
       	if ($_cmd->getIsHistorized()) {
+        	if (config::byKey('version') < '4.3.1') { // durationbetween comporte un bug si Jeedom < 4.3.1 et affiche une erreur getDatetime() on null si pas de donnée dans l'historique
+     	 		log::add(__CLASS__, 'debug', 'Version Jeedom : '.config::byKey('version'));  
+    			return 'Jeedom < 4.3.1';
+    		}
           	
             $_cmdname = '#'.$_cmd->getHumanName().'#';
             log::add(__CLASS__, 'debug', 'Nom de la commande binaire trouvée : '.$_cmdname);			
@@ -186,7 +197,12 @@ class energysaver extends eqLogic {
     
     $_cmd = self::getCmd_Power($_eqLogic);    
     if (is_object($_cmd)) {
-      	if ($_cmd->getIsHistorized()) {
+      	if ($_cmd->getIsHistorized()) {          
+            if (config::byKey('version') < '4.3.1') { // durationbetween comporte un bug si Jeedom < 4.3.1 et affiche une erreur getDatetime() on null si pas de donnée dans l'historique
+     	 		log::add(__CLASS__, 'debug', 'Version Jeedom : '.config::byKey('version'));  
+    			return 'Jeedom < 4.3.1';
+    		}
+          
           	$_cmdid = $_cmd->getId();
             $_cmdname = '#'.$_cmd->getHumanName().'#';
             log::add(__CLASS__, 'debug', 'Nom de la commande de puissance trouvée : '.$_cmdname);
@@ -784,7 +800,7 @@ class energysaver extends eqLogic {
     
     $NumberOfDevices = self::getNumberOfDevices(); // Nombre d'équipements total et actif
     $replace['#nb_total_device#'] = $NumberOfDevices['total'];
-    $replace['#nb_enable_device#'] = $NumberOfDevices['enable'];
+    $replace['#nb_schedule_device#'] = $NumberOfDevices['schedule'];
 
     
     $main_state = $this->getCmd(null, 'state')->execCmd(); // Etat du mode en cours (1 = energy saver ; 0 no energy saver)
