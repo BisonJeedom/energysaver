@@ -194,7 +194,13 @@ $eqLogics = eqLogic::byType($plugin->getId());
 								<th style="min-width:200px;width:350px;">{{Nom}}</th>
 								
 								<th style="min-width:260px;">{{Options}}</th>
+                                <?php
+                                if (version_compare(jeedom::version(), '4.3.0', '>=')) {
+	                                echo '<th>{{Etat}}</th>';
+                                }
+                                ?>
 								<th style="min-width:80px;width:200px;">{{Actions}}</th>
+                                
 							</tr>
 						</thead>
 						<tbody>
