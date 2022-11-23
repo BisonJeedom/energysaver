@@ -128,12 +128,27 @@ class energysaver extends eqLogic {
   } 
   
   
+  public static function durationBetweenIfExist($_cmd_id, $_value, $_startDate, $_endDate, $_unit = 60) {
+    // Fonction de contournement d'un problème qui n'est corrigé qu'à partir de la version 4.3.0
+    if (!is_numeric(str_replace('#', '', $_cmd_id))) {
+      $cmd = cmd::byId(str_replace('#', '', cmd::humanReadableToCmd($_cmd_id)));
+    } else {
+      $cmd = cmd::byId(str_replace('#', '', $_cmd_id));
+    }
+    if (!is_object($cmd) || $cmd->getIsHistorized() == 0) {
+      return 0;
+    }
+    $histories = $cmd->getHistory();
+    if (count($histories) == 0) {
+      return 0;
+    } else {
+      return scenarioExpression::durationBetween($_cmd_id, $_value, $_startDate, $_endDate, $_unit = 60);
+    }
+  }
+  
 
   
   public static function getStateDuration($_eqLogic, $_value) {
-    
-
-
     $eqLogic_id = $_eqLogic->getId();
     $schedule = energysaver::getschedule($eqLogic_id); // Récupération de la planification	
     //log::add(__CLASS__, 'debug', 'schedule : '.$schedule.' pour equipement : '.$_eqLogic->getName());  
@@ -147,7 +162,7 @@ class energysaver extends eqLogic {
       	if ($_cmd->getIsHistorized()) {
         	if (config::byKey('version') < '4.3.1') { // durationbetween comporte un bug si Jeedom < 4.3.1 et affiche une erreur getDatetime() on null si pas de donnée dans l'historique
      	 		log::add(__CLASS__, 'debug', 'Version Jeedom : '.config::byKey('version'));  
-    			return 'Jeedom < 4.3.1';
+    			//return 'Jeedom < 4.3.1';
     		}
           	
             $_cmdname = '#'.$_cmd->getHumanName().'#';
@@ -166,12 +181,14 @@ class energysaver extends eqLogic {
               //log::add(__CLASS__, 'debug', $cfg_h1_stop.$cfg_m1_stop . ' > '. $cfg_h1_start.$cfg_m1_start);
               for ($i = 0; $i < 30; $i++) {
                 $ii = $i+1;
-                $duration = $duration + scenarioExpression::durationbetween($_cmdname, $_value, $ii.' day ago '.$hstop_2, $i.' day ago '.$hstart_2);
+                $duration = $duration + self::durationBetweenIfExist($_cmdname, $_value, $ii.' day ago '.$hstop_2, $i.' day ago '.$hstart_2);
+                //$duration = $duration + scenarioExpression::durationBetween($_cmdname, $_value, $ii.' day ago '.$hstop_2, $i.' day ago '.$hstart_2);
               }
             } else { // Si l'heure du stop est inférieur à celui du start (période jour comme un stop entre 10h00 et 13h00)
               //log::add(__CLASS__, 'debug', $cfg_h1_stop.$cfg_m1_stop . ' < '. $cfg_h1_start.$cfg_m1_start); 
               for ($i = 0; $i < 30; $i++) {
-                  $duration = $duration + scenarioExpression::durationbetween($_cmdname, $_value, $i.' day ago '.$hstop_2, $i.' day ago '.$hstart_2);
+                 $duration = $duration + self::durationBetweenIfExist($_cmdname, $_value, $i.' day ago '.$hstop_2, $i.' day ago '.$hstart_2);
+                 // $duration = $duration + scenarioExpression::durationBetween($_cmdname, $_value, $i.' day ago '.$hstop_2, $i.' day ago '.$hstart_2);
               }
             }
 
@@ -200,7 +217,7 @@ class energysaver extends eqLogic {
       	if ($_cmd->getIsHistorized()) {          
             if (config::byKey('version') < '4.3.1') { // durationbetween comporte un bug si Jeedom < 4.3.1 et affiche une erreur getDatetime() on null si pas de donnée dans l'historique
      	 		log::add(__CLASS__, 'debug', 'Version Jeedom : '.config::byKey('version'));  
-    			return 'Jeedom < 4.3.1';
+    			//return 'Jeedom < 4.3.1';
     		}
           
           	$_cmdid = $_cmd->getId();
@@ -503,19 +520,20 @@ class energysaver extends eqLogic {
     $_eqLogic->save();
   }
  
-  public static function executeAction($_eqLogic, $_action) { 
+  public static function executeAction($_eqLogic, $_action) {
+    log::add(__CLASS__, 'debug', '_executeAction : '.$_action); // for debug
     if ($_action == 'stop') {
       $EqID = $_eqLogic->getCmd(null, 'EqID')->execCmd(); // Récupération de l'ID de la commande
       $EqName = eqLogic::byId($EqID)->getName();
-      //log::add(__CLASS__, 'debug', 'Equipement ID : '.$EqID);
-      //log::add(__CLASS__, 'debug', 'Equipement Name : '.$EqName);
+      log::add(__CLASS__, 'debug', 'ID Equipement : '.$EqID); // for debug
 
       $cmdID_off = self::getOffAction($EqID); // Id de la commande Off de l'équipement
-
-      //log::add(__CLASS__, 'debug', 'ID Equipement : '.$cmdID_off);
+      log::add(__CLASS__, 'debug', 'ID Commande stop : '.$cmdID_off); // for debug
+      
       cmd::byId($cmdID_off)->execCmd(); // Execution de la commande Off
       log::add(__CLASS__, 'info', 'Entrée dans le mode Energy Saver pour l\'équipement '.$EqName.' : commande Off');
       $_eqLogic->checkAndUpdateCmd('state', 1);
+      sleep(1); // Pour éviter d'envoyer trop d'ordre en même temps
     }
 
     if ($_action == 'start') {
@@ -523,16 +541,17 @@ class energysaver extends eqLogic {
 
       $EqID = $_eqLogic->getCmd(null, 'EqID')->execCmd(); // Récupération de l'ID de la commande
       $EqName = eqLogic::byId($EqID)->getName();
-      //log::add(__CLASS__, 'debug', 'ID Equipement : '.$EqID);
+      log::add(__CLASS__, 'debug', 'ID Equipement : '.$EqID); // for debug
 
       $cmdID_on = self::getOnAction($EqID);    
-      //log::add(__CLASS__, 'debug', 'ID Equipement : '.$cmdID_on);
+      log::add(__CLASS__, 'debug', 'ID Commande start : '.$cmdID_on); // for debug
 
       $cfg_disableAutoOn = $_eqLogic->getConfiguration('cfg_disableAutoOn'); // Récupération du paramètre cfg_disableAutomaticyOn de l'équipement
       if ($cfg_disableAutoOn == 0) {
         log::add(__CLASS__, 'info', 'Sortie du mode Energy Saver pour l\'équipement '.$EqName.' : commande On');
         cmd::byId($cmdID_on)->execCmd(); // Execution de la commande On          
-        $_eqLogic->checkAndUpdateCmd('state', 0);          
+        $_eqLogic->checkAndUpdateCmd('state', 0);
+        sleep(1); // Pour éviter d'envoyer trop d'ordre en même temps
       } else {
         log::add(__CLASS__, 'info', 'L\'équipement '.$EqName.' est paramétré pour ne pas être rallumé automatiquement');
       }
@@ -634,11 +653,12 @@ class energysaver extends eqLogic {
     $cfg_planifications = self::getStopStartParameters(''); // Récupération du paramétrage de la planification sans sépararteur
     
     for ($i = 1; $i <= 3 ; $i++) {
+      	log::add(__CLASS__, 'debug', 'check planification '.$i); // for debug
         $action = '';  
       	if ($_action == '') { // Cas d'un cron5 donc sans éxécution d'une commande action de on ou off
           $hstop = $cfg_planifications['stop'][$i];
           $hstart = $cfg_planifications['start'][$i];      
-          //log::add(__CLASS__, 'debug', 'Plannif : '.$hstop.' -> '.$hstart);
+          log::add(__CLASS__, 'debug', 'Plannif : '.$hstop.' -> '.$hstart); // for debug
 
           $cfg_modetrigger = config::byKey('cfg_modetrigger_'.$i, __CLASS__); // Récupération du paramètre global cfg_modetrigger pour la planification en cours (1 à 3)
           
@@ -649,42 +669,51 @@ class energysaver extends eqLogic {
 
           if ((scenarioExpression::time_between($heure, $hstop, $hstart)) && ($heure != $hstart)) {
               $action = 'stop';
+              log::add(__CLASS__, 'debug', 'set action stop (cron)'); // for debug
           }
 
           // Test si heure du start
           if ($heure == $cfg_planifications['start'][$i]) {
-              $action = 'start';          	
+              $action = 'start';
+              log::add(__CLASS__, 'debug', 'set action start (cron)'); // for debug
           }        
-        }
-      
-      	if ($_action == 'start' && $_planification == $i) { // cas d'un start éxécuté via une commande action avec correspondance du numéro de la planification
-        	$action = 'start';
         }
       
       	if ($_action == 'stop' && $_planification == $i) { // cas d'un stop éxécuté via une commande action avec correspondance du numéro de la planification
           	$action = 'stop';
+          	log::add(__CLASS__, 'debug', 'set action stop (trigger)'); // for debug
         }
+      
+      	if ($_action == 'start' && $_planification == $i) { // cas d'un start éxécuté via une commande action avec correspondance du numéro de la planification
+        	$action = 'start';
+          	log::add(__CLASS__, 'debug', 'set action start (trigger)'); // for debug
+        }
+      
+
 
         // Action sur les équipements gérés par le plugin
         if ($action == 'stop' || $action == 'start') { // Action à lancer
           log::add(__CLASS__, 'debug', '-- Exécution des actions de '.$action.' liées à la planification n°'.$i.' (START) --');          
           $array = self::getEqBySchedule($i); // Récupération des équipements attachés à la planification       
           foreach ($array as $eqLogic) {
-          	//log::add(__CLASS__, 'debug', 'Analyse en cours de l\équipement '.$eqLogic->getName());
+          	log::add(__CLASS__, 'debug', 'Analyse en cours de l\équipement '.$eqLogic->getName()); // for debug
             $value = self::getCmdStateValueByPluginEqLogic($eqLogic);
-            //log::add(__CLASS__, 'debug', 'Etat de la commande : '.$value);
+            log::add(__CLASS__, 'debug', 'Etat de la commande : '.$value); // for debug
             
             if ($action == 'stop') {
               	if ($value == 1) {                  	
                   	$nb_off = $eqLogic->getCmd(null, 'NbOnDuringOff')->execCmd();
-                  	if ($cfg_forceOff == 1) { // Si configuré pour éteindre un équipement qui a été rallumé durant la planification                      
+                  	if ($cfg_forceOff == 1) { // Si configuré pour éteindre un équipement qui a été rallumé durant la planification
+                      log::add(__CLASS__, 'debug', 'config pour éteindre un équipement qui a été rallumé durant la planification'); // for debug
                       if ($nb_off == 0) { // Premier arrêt au début de la planification
                           	self::executeAction($eqLogic, $action); // Execute stop                          
                           	$eqLogic->checkAndUpdateCmd('NbOnDuringOff', $nb_off+1);
+                        	log::add(__CLASS__, 'debug', 'first stop - nb_off = '.$nb_off); // for debug
                       } elseif ($nb_off == 1) { // Si allumé 1 fois durant la planification, nouveau Off
                       		log::add(__CLASS__, 'info', 'Mode activé : Eteindre un équipement qui a été rallumé durant la planification (1 fois)');	            
                           	self::executeAction($eqLogic, $action); // Execute stop                          
-                          	$eqLogic->checkAndUpdateCmd('NbOnDuringOff', $nb_off+1);                        
+                          	$eqLogic->checkAndUpdateCmd('NbOnDuringOff', $nb_off+1); 
+                        	log::add(__CLASS__, 'debug', 'second stop - nb_off = '.$nb_off); // for debug
                       } elseif ($nb_off == 2) { // Pas de nouveau Off, on averti dans dans le centre de message et on passage la commande NbOnDuringOff à -1 pour ne pas relancer un nouveau message durant la planification
                           	$eqID = $eqLogic->getCmd(null, 'EqID')->execCmd();
                           	$eqName = eqLogic::byId($eqID)->getName();
@@ -693,11 +722,13 @@ class energysaver extends eqLogic {
                         	$eqLogic->checkAndUpdateCmd('NbOnDuringOff', -1);
                       } else {
                         	// Rien à faire
+                        	log::add(__CLASS__, 'debug', 'Rien à faire'); // for debug
                       }
                     } else {
                     	if ($nb_off == 0) { // Si jamais éteint
                           self::executeAction($eqLogic, $action); // Execute stop                 	
                           $eqLogic->checkAndUpdateCmd('NbOnDuringOff', $nb_off+1);
+                          log::add(__CLASS__, 'debug', 'first stop - nb_off = '.$nb_off); // for debug
                         }
                     }
                 } elseif ($value == 0) {
@@ -727,13 +758,13 @@ class energysaver extends eqLogic {
           // Action sur l'équipement principal (main)
           $eqLogicMain = eqLogic::byLogicalId('main', 'energysaver');
           if ($action == 'stop') {
-            //log::add(__CLASS__, 'debug', 'Main Stop');
+            log::add(__CLASS__, 'debug', 'Main Stop'); // for debug
             $eqLogicMain->checkAndUpdateCmd('state', 1); 
             $eqLogicMain->checkAndUpdateCmd('Schedule'.$i, 1);
           } 
 
           if ($action == 'start') {
-            //log::add(__CLASS__, 'debug', 'Main Start');
+            log::add(__CLASS__, 'debug', 'Main Start'); // for debug
             $eqLogicMain->checkAndUpdateCmd('state', 0);  
             $eqLogicMain->checkAndUpdateCmd('Schedule'.$i, 0);
           }
