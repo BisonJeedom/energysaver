@@ -81,6 +81,7 @@ class energysaver extends eqLogic {
   }
   
   public static function isEligible($eqLogic) {
+    $count = 0;  
     foreach ($eqLogic->getCmd('action') as $cmd) {
       $cmd_name = $cmd->getName();
       if (strtolower($cmd_name) == "on" || strtolower($cmd_name) == "off") {
@@ -177,6 +178,8 @@ class energysaver extends eqLogic {
             $hstop_2  = $cfg_planifications_2['stop'][$schedule];
             $hstart_2 = $cfg_planifications_2['start'][$schedule];
             
+            $duration = 0;
+		
             if ($hstop_1 > $hstart_1) { // Si l'heure du stop est supérieur à celui du start (période nuit comme un stop entre 23h00 et 07h00)
               //log::add(__CLASS__, 'debug', $cfg_h1_stop.$cfg_m1_stop . ' > '. $cfg_h1_start.$cfg_m1_start);
               for ($i = 0; $i < 30; $i++) {
