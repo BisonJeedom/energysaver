@@ -118,13 +118,15 @@ if (!isConnect('admin')) {
                         
                         // Modification de la couleur de la ligne pour appuyer sur le fait qu'il faudrait prendre en charge l'équipempent
                         if ($schedule < 0 && $cmd_power_value != 'Introuvable' && $cmd_consumption_value != 'Introuvable' && $cmd_state_duration30 != 'Introuvable' && $cmd_state_duration_30 != 'Non historisée' && $cmd_state_duration_30 != 'Aucune activité') {
-                          $line_color ='rgba(98, 21, 21, 0.6) !important';
+                          //$line_color ='rgba(98, 21, 21, 0.6) !important';
+                          $line_color = 'rgb(195 125 40 / 30%) !important';
+                          //$line_color ='var(--al-warning-color) !important';
                         } else {
                           $line_color = 'var(--bg-modal-color) !important;';
                         }
 
                         
-                        echo '<tr style="background-color: '.$line_color.'">'
+                        echo '<tr style="color: var(--txt-color) !important; background-color: '.$line_color.'">'
                         //echo '<tr>'
                           //. '<td style="text-align:center; height:34px !important;"><input type="checkbox" id="checked_input_' . $num++  . '" data-id="' . $eqLogic_id . '" style="border: 1px solid var(--link-color) !important;" class="form-control"';
                           . '<td >'
@@ -136,7 +138,9 @@ if (!isConnect('admin')) {
                           
                           	$value = $i;
                           	if ($value == 0) {
-                            	$text = 'Aucune planification';
+                            	$text = 'Aucune planification';                              
+                            } elseif ($hstop == '' && $hstart == '') {
+                            	$text = '['.$i.']'.' Déclencheur';
                             } else {
                             	$text = '['.$i.'] '.$hstop.' -> '.$hstart;
                             }
