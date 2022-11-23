@@ -215,9 +215,9 @@ class energysaver extends eqLogic {
     $_cmd = self::getCmd_Power($_eqLogic);    
     if (is_object($_cmd)) {
       	if ($_cmd->getIsHistorized()) {          
-            if (config::byKey('version') < '4.3.1') { // durationbetween comporte un bug si Jeedom < 4.3.1 et affiche une erreur getDatetime() on null si pas de donnée dans l'historique
+            if (config::byKey('version') < '4.3.1') { // averageTemporalBetween n'exite pas avant 4.3.1
      	 		log::add(__CLASS__, 'debug', 'Version Jeedom : '.config::byKey('version'));  
-    			//return 'Jeedom < 4.3.1';
+    			return 'Jeedom < 4.3.1';
     		}
           
           	$_cmdid = $_cmd->getId();
