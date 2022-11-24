@@ -325,7 +325,25 @@ class energysaver extends eqLogic {
     return -2; // Equipement non géré  
   }
     
-  
+  public static function getDisableAutoOnCfg($_id) {
+    //////////////////////////////////////////////////////////////////////////////////////////
+    //		Retourne le numéro de la planification à partir de l'ID de l'équipement réel	//
+    //////////////////////////////////////////////////////////////////////////////////////////
+    foreach (eqLogic::byType('energysaver') as $eqLogic) {
+      	$cmd = $eqLogic->getCmd(null, 'EqID');
+      	if (is_object($cmd)) {    	
+     		$id = $cmd->execCmd();          
+            if ($id == $_id) {              
+        		$cfg_disableAutoOn = $eqLogic->getConfiguration('cfg_disableAutoOn'); // Récupération du paramètre cfg_disableAutomaticyOn de l'équipement              
+              	return $cfg_disableAutoOn;
+            }          
+        }
+    }
+    return 0;
+  }
+    
+    
+    
   public static function getStateCmd($eqLogic) {
     foreach ($eqLogic->getCmd('info') as $cmd) { // Parcours des commandes info
       $name = $cmd->getName();
