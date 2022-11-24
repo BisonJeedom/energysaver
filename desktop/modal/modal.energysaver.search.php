@@ -56,6 +56,7 @@ if (!isConnect('admin')) {
                     <tr >
   						<th style="width:30px;">Planification</th>
   						<th style="text-align: center; width:30px;">{{Etat dans le plugin}}</th>
+              			<th style="text-align: center; width:30px;">{{Ne pas rallumer automatiquement}}</th>
  						<th style="width:30px;">{{Id}}</th>
                         <th style="width:30px;">{{Plugin}}</th>
                         <th style="width:180px;">{{Equipement}}</span></th>
@@ -100,6 +101,7 @@ if (!isConnect('admin')) {
                         
                         $cmd_avg_power_30 = energysaver::getAveragePower($eqLogic, 30); // Durée pendant laquel l'équipement était On sur 30 jours durant la période où elle aurait pu être éteinte
                        
+                        
                         // Equipement déjà géré dans le plugin (crée actif ou pas) ?
                         $eqLogic_id = $eqLogic->getId();
                         $schedule = energysaver::getschedule($eqLogic_id); // Récupération de la planification
@@ -113,7 +115,9 @@ if (!isConnect('admin')) {
                           $color = 'grey'; // Existe mais désactivé (old) ou sans planification
                         }
                        
- 
+                        $cfg_disableAutoOn = energysaver::getDisableAutoOnCfg($eqLogic_id); // Récupération du paramètre cfg_disableAutomaticyOn de l'équipement
+                        //log::add('energysaver', 'debug', 'cfg_disableAutoOn '. $cfg_disableAutoOn);   
+                        
                         //log::add('energysaver', 'debug', 'isManaged ok');
                         
                         // Modification de la couleur de la ligne pour appuyer sur le fait qu'il faudrait prendre en charge l'équipempent
@@ -128,15 +132,15 @@ if (!isConnect('admin')) {
                         
                         echo '<tr style="color: var(--txt-color) !important; background-color: '.$line_color.'">'
                         //echo '<tr>'
-                          //. '<td style="text-align:center; height:34px !important;"><input type="checkbox" id="checked_input_' . $num++  . '" data-id="' . $eqLogic_id . '" style="border: 1px solid var(--link-color) !important;" class="form-control"';
+                       	//. '<td style="text-align:center; height:34px !important;"><input type="checkbox" id="checked_input_' . $num++  . '" data-id="' . $eqLogic_id . '" style="border: 1px solid var(--link-color) !important;" class="form-control"';
                           . '<td >'
                           . '<select style="width:auto; height: 30px;" id="checked_input_' . $num++  . '" data-id="' . $eqLogic_id . '" >';                     
                                       
                        	for ($i = 0; $i <= 3; $i++) {
-				if ($i > 0) {
+							if ($i > 0) {
                           		$hstop  = $cfg_planifications['stop'][$i];
-                			$hstart = $cfg_planifications['start'][$i];
-				}
+                				$hstart = $cfg_planifications['start'][$i];
+							}
                           
                           	$value = $i;
                           	if ($value == 0) {
@@ -158,6 +162,11 @@ if (!isConnect('admin')) {
                         echo '</select>'
                         	.'</td>'                          
                           	. '<td><center>'. energysaver::drawCircle("15px", $color) . '</center></td>'
+                            . '<td><center>' . '<input type="checkbox" disabled ';
+                            if ($cfg_disableAutoOn == 1 ) {
+                              echo 'checked';
+                            }
+                        echo ' />' . '</center></td>'  
                             . '<td>' . $eqLogic_id . '</td>'
                             . '<td>' . $plugin_id . '</td>'
                             . '<td>' . $eqLogic->getName() . '</span></td>'
