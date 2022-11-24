@@ -117,7 +117,7 @@ if (!isConnect('admin')) {
                         //log::add('energysaver', 'debug', 'isManaged ok');
                         
                         // Modification de la couleur de la ligne pour appuyer sur le fait qu'il faudrait prendre en charge l'équipempent
-                        if ($schedule < 0 && $cmd_power_value != 'Introuvable' && $cmd_consumption_value != 'Introuvable' && $cmd_state_duration30 != 'Introuvable' && $cmd_state_duration_30 != 'Non historisée' && $cmd_state_duration_30 != 'Aucune activité') {
+                        if ($schedule < 0 && $cmd_power_value != 'Introuvable' && $cmd_consumption_value != 'Introuvable' && $cmd_state_duration_30 != 'Introuvable' && $cmd_state_duration_30 != 'Non historisée' && $cmd_state_duration_30 != 'Aucune activité') {
                           //$line_color ='rgba(98, 21, 21, 0.6) !important';
                           $line_color = 'rgb(195 125 40 / 30%) !important';
                           //$line_color ='var(--al-warning-color) !important';
@@ -133,8 +133,10 @@ if (!isConnect('admin')) {
                           . '<select style="width:auto; height: 30px;" id="checked_input_' . $num++  . '" data-id="' . $eqLogic_id . '" >';                     
                                       
                        	for ($i = 0; $i <= 3; $i++) {
-                          	$hstop  = $cfg_planifications['stop'][$i];
+				if ($i > 0) {
+                          		$hstop  = $cfg_planifications['stop'][$i];
                 			$hstart = $cfg_planifications['start'][$i];
+				}
                           
                           	$value = $i;
                           	if ($value == 0) {
