@@ -1,6 +1,7 @@
 modetrigger();
 
 function modetrigger() {
+  	// Désactivation des input d'heure si selection du mode déclencheur
   	for (var i = 1; i <= 3; i++) {  	
     	//var mode = $( "#modetrigger_" + i).is(':checked');
       	//var id = $("#checked_input_" + i).attr('data-id');
@@ -17,4 +18,26 @@ function modetrigger() {
           	$('#select_m' + i + '_start').attr('disabled', false); 
         }
     }
+}
+
+function energysaver_postSaveConfiguration() {
+  	// Après la sauvegarde de la configuration, appel ajax qui refresh le template via l'action SaveConfig
+    $.ajax({
+        type: "POST",
+        url: "plugins/energysaver/core/ajax/energysaver.ajax.php",
+        data: {
+            action: "SaveConfig",
+        },
+        dataType: 'json',
+        error: function (request, status, error) {
+            handleAjaxError(request, status, error);
+        },
+        success: function (data) {
+            if (data.state != 'ok') {
+                $('#div_alert').showAlert({message: data.result, level: 'danger'});
+                return;
+            }
+            window.location.reload();
+        }
+    });
 }
