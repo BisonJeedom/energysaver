@@ -798,6 +798,7 @@ class energysaver extends eqLogic {
   }
   
   
+  
   public function toHtml($_version = 'dashboard') {
     $eqLogicalId = $this->getLogicalId();
 
