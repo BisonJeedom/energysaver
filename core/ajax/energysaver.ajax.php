@@ -35,6 +35,12 @@ try {
         
     }
 
+  	if (init('action') == 'SaveConfig') {
+      	// Refresh du template après la sauvegarde de la configuration
+      	$eqLogicMain = eqLogic::byLogicalId('main', 'energysaver');
+      	$eqLogicMain->refreshWidget();
+        ajax::success();        
+    }
 
     throw new Exception(__('Aucune méthode correspondante à', __FILE__) . ' : ' . init('action'));
     /*     * *********Catch exeption*************** */
