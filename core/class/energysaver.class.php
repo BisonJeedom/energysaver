@@ -80,6 +80,52 @@ class energysaver extends eqLogic {
     return sprintf($format, $hours, $minutes);
   }
   
+  
+  public static function checkNewEligibleDevices() {
+    log::add('energysaver', 'debug', '--- Cron de découverte de nouveaux équipements eligibles (START) ---');
+    
+    $eqLogicMain = eqLogic::byLogicalId('main', 'energysaver');
+    $json_array_known_devices = $eqLogicMain->getConfiguration("json_array_known_devices", ""); // Chargement de la liste des équipements déjà découvert par le plugin
+    $array_known_devices = json_decode($json_array_known_devices, true);
+    
+    $count = 0;
+    
+    $plugins = plugin::listPlugin();
+  	foreach ($plugins as $plugin) {
+      //log::add(__CLASS__, 'debug', 'checkNewEligibleDevices foreach');
+      $plugin_id = $plugin->getId();
+      //log::add(__CLASS__, 'debug', 'checkNewEligibleDevices : '. $plugin_id);
+      foreach (eqLogic::byType($plugin_id) as $eqLogic) {
+        //log::add(__CLASS__, 'debug', 'checkNewEligibleDevices : '. $eqLogic->getName());
+        if ($eqLogic->getIsEnable()) {                      
+          if (self::isEligible($eqLogic)) {
+            $eqLogic_id = $eqLogic->getId();
+            //log::add(__CLASS__, 'debug', 'checkNewEligibleDevices eqLogic_id : '. $eqLogic_id);
+            if (!in_array($eqLogic_id, $array_known_devices)) {
+           		$array_known_devices[] = $eqLogic_id;
+              	$count++;
+            }
+          }
+        }
+      }
+    }
+    
+    $json_array_known_devices = json_encode($array_known_devices);
+    log::add('energysaver', 'debug', 'json_array_known_devices : '. $json_array_known_devices);
+    $eqLogicMain->setConfiguration("json_array_known_devices", $json_array_known_devices);
+    $eqLogicMain->save();    
+    
+    if ($count > 1) {
+      	log::add('energysaver', 'info', $count.' équipements eligibles supplémentaires découvert !');    
+      	message::add('energysaver', 'Découverte de '.$count.' nouveaux équipements eligibles');
+    } elseif ($count > 0) {
+   		log::add('energysaver', 'info', 'un équipement eligible supplémentaire découvert !');    
+      	message::add('energysaver', 'Découverte d\'un nouvel équipement eligible');  
+    }
+    log::add('energysaver', 'debug', '--- Cron de découverte de nouveaux équipements eligibles (END) ---');
+  }
+  
+  
   public static function isEligible($eqLogic) {
     $count = 0;  
     foreach ($eqLogic->getCmd('action') as $cmd) {
@@ -911,6 +957,7 @@ class energysaver extends eqLogic {
   public static function cron() {}
   */
   
+  
 
   /*
   * Fonction exécutée automatiquement toutes les 5 minutes par Jeedom
@@ -941,8 +988,11 @@ class energysaver extends eqLogic {
 
   /*
   * Fonction exécutée automatiquement tous les jours par Jeedom
-  public static function cronDaily() {}
   */
+  public static function cronDaily() {
+  	energysaver::checkNewEligibleDevices();
+  }
+  
 
   /*     * *********************Méthodes d'instance************************* */
 
