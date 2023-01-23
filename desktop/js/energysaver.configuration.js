@@ -7,15 +7,21 @@ function modetrigger() {
       	//var id = $("#checked_input_" + i).attr('data-id');
       	//console.log("mode: " + mode);
       	if ($( "#modetrigger_" + i).is(':checked')) {
-      		$('#select_h' + i + '_stop').attr('disabled', 'disabled');
+      		$('#select_h' + i + '_stop').attr('disabled', 'disabled');          	
           	$('#select_m' + i + '_stop').attr('disabled', 'disabled');
             $('#select_h' + i + '_start').attr('disabled', 'disabled');
           	$('#select_m' + i + '_start').attr('disabled', 'disabled');
+          	for (var k = 1; k <= 7; k++) {  
+          		$('#checkbox_j' + k +'_' + i).attr('disabled', 'disabled');
+            }
         } else {
             $('#select_h' + i + '_stop').attr('disabled', false);
           	$('#select_m' + i + '_stop').attr('disabled', false);
             $('#select_h' + i + '_start').attr('disabled', false);
-          	$('#select_m' + i + '_start').attr('disabled', false); 
+          	$('#select_m' + i + '_start').attr('disabled', false);
+            for (var k = 1; k <= 7; k++) {  
+          		$('#checkbox_j' + k +'_' + i).attr('disabled', false);
+            }
         }
     }
 }
