@@ -489,13 +489,13 @@ class energysaver extends eqLogic {
       if (!is_object($info)) {
         $info = new energysaverCmd();
         $info->setName(__('Etat planification '.$i, __FILE__));
+        $info->setTemplate('dashboard','line'); 
+        $info->setIsVisible(0);
       }
       $info->setLogicalId('Schedule'.$i);
       $info->setEqLogic_id($eqLogic->getId());
       $info->setType('info');
-      $info->setSubType('numeric');
-      $info->setTemplate('dashboard','line');
-      $info->setIsVisible(0);
+      $info->setSubType('numeric');          
       $info->save();
     }
     
@@ -505,12 +505,12 @@ class energysaver extends eqLogic {
       if (!is_object($info)) {
         $info = new energysaverCmd();
         $info->setName(__('Planification '.$i.' On', __FILE__));
+        $info->setIsVisible(0);
       }
       $info->setLogicalId('Schedule'.$i.'_on');
       $info->setEqLogic_id($eqLogic->getId());
       $info->setType('action');
-      $info->setSubType('other');
-      $info->setIsVisible(0);
+      $info->setSubType('other');      
       $info->save();
       
       log::add(__CLASS__, 'info', 'Create Main Equipment / Commande Schedule'.$i.'_off');
@@ -518,12 +518,38 @@ class energysaver extends eqLogic {
       if (!is_object($info)) {
         $info = new energysaverCmd();
         $info->setName(__('Planification '.$i.' Off', __FILE__));
+        $info->setIsVisible(0);
       }
       $info->setLogicalId('Schedule'.$i.'_off');
       $info->setEqLogic_id($eqLogic->getId());
       $info->setType('action');
-      $info->setSubType('other');
-      $info->setIsVisible(0);
+      $info->setSubType('other');      
+      $info->save();
+      
+      log::add(__CLASS__, 'info', 'Create Main Equipment / Commande Schedule'.$i.'_triggermode_off');
+      $info = $eqLogic->getCmd(null, 'Schedule'.$i.'_triggermode_off');
+      if (!is_object($info)) {
+        $info = new energysaverCmd();
+        $info->setName(__('Planification '.$i.' Mode Declencheur Off', __FILE__));
+        $info->setIsVisible(0);
+      }
+      $info->setLogicalId('Schedule'.$i.'_triggermode_off');
+      $info->setEqLogic_id($eqLogic->getId());
+      $info->setType('action');
+      $info->setSubType('other');      
+      $info->save();
+      
+      log::add(__CLASS__, 'info', 'Create Main Equipment / Commande Schedule'.$i.'_triggermode_on');
+      $info = $eqLogic->getCmd(null, 'Schedule'.$i.'_triggermode_on');
+      if (!is_object($info)) {
+        $info = new energysaverCmd();
+        $info->setName(__('Planification '.$i.' Mode Declencheur On', __FILE__));
+        $info->setIsVisible(0);
+      }
+      $info->setLogicalId('Schedule'.$i.'_triggermode_on');
+      $info->setEqLogic_id($eqLogic->getId());
+      $info->setType('action');
+      $info->setSubType('other');      
       $info->save();
       
     }
@@ -711,26 +737,49 @@ class energysaver extends eqLogic {
     }
   }
   
+
+    public static function ChangeScheduleTriggerMode($_action, $_schedule) {
+    //////////////////////////////////////////////////////////////////////
+    //				Modifie le mode de la planification					//
+    //			on = Mode déclencheur | off = Mode Planification		//
+    //////////////////////////////////////////////////////////////////////
+     
+      if ($_action == 'off') { // Désactivation du mode declencheur -> mode planification
+		config::save('cfg_modetrigger_'.$_schedule, 0, __CLASS__);
+      }
+
+      if ($_action == 'on') { // Activation du mode declencheur -> mode déclencheur
+	  	config::save('cfg_modetrigger_'.$_schedule, 1, __CLASS__);
+      }
+      
+      $eqLogicMain = eqLogic::byLogicalId('main', 'energysaver');
+      $eqLogicMain->refreshWidget();
+    }
   
   public static function CheckScheduleAndExecute($_action = '', $_planification = '') {
     $heure = date("Hi");
+    $day_number = date('N'); // (1 for Monday, 7 for Sunday)
     
     $cfg_forceOff = config::byKey('cfg_forceOff', __CLASS__); // Recupération du paramètre global cfg_forceOff
 
     $cfg_planifications = self::getStopStartParameters(''); // Récupération du paramétrage de la planification sans sépararteur
     
     for ($i = 1; $i <= 3 ; $i++) {
-      	log::add(__CLASS__, 'debug', 'check planification '.$i); // for debug
+      	log::add(__CLASS__, 'debug', '-- Planification '.$i.' --'); // for debug
         $action = '';  
       	if ($_action == '') { // Cas d'un cron5 donc sans éxécution d'une commande action de on ou off
           $hstop = $cfg_planifications['stop'][$i];
           $hstart = $cfg_planifications['start'][$i];      
-          log::add(__CLASS__, 'debug', 'Plannif : '.$hstop.' -> '.$hstart); // for debug
+          log::add(__CLASS__, 'debug', $hstop.' (off) -> '.$hstart.' (on)'); // for debug
 
           $cfg_modetrigger = config::byKey('cfg_modetrigger_'.$i, __CLASS__); // Récupération du paramètre global cfg_modetrigger pour la planification en cours (1 à 3)
           
-          if ($hstop == '' && $hstart == '' || $cfg_modetrigger == 1) { // Aucune planification, mal configurée ou mode "déclencheur"
-              log::add(__CLASS__, 'debug', $i.' non traité car planification incorrecte ou en mode déclencheur');
+          $cfg_day_checked = config::byKey('cfg_j'.$day_number.'_'.$i, __CLASS__); // Récupération du paramètre global cfg_j_day_x pour la planification en cours (1 à 3)
+          
+          //log::add(__CLASS__, 'debug', ' day_number : '.$day_number.' / checked : '.$cfg_day_checked);
+          
+          if ($hstop == '' && $hstart == '' || $cfg_modetrigger == 1 || $cfg_day_checked == 0) { // Aucune planification, mal configurée ou mode "déclencheur"
+              log::add(__CLASS__, 'debug', $i.' non traité car planification incorrecte, mode déclencheur ou exclusion du jour en cours');
               continue;  
           }
 
@@ -1153,7 +1202,31 @@ class energysaverCmd extends cmd {
       case 'Schedule3_off': // LogicalId de la commande
         log::add('energysaver', 'debug', 'éxécution commande Schedule3_off');
         energysaver::CheckScheduleAndExecute('stop', 3);      	
-      	break;        
+      	break; 
+      case 'Schedule1_triggermode_off': // LogicalId de la commande
+        log::add('energysaver', 'debug', 'éxécution commande Schedule1_triggermode_off');
+        energysaver::ChangeScheduleTriggerMode('off', 1);      	
+      	break;
+      case 'Schedule1_triggermode_on': // LogicalId de la commande
+        log::add('energysaver', 'debug', 'éxécution commande Schedule1_triggermode_on');
+        energysaver::ChangeScheduleTriggerMode('on', 1);      	
+      	break;
+      case 'Schedule2_triggermode_off': // LogicalId de la commande
+        log::add('energysaver', 'debug', 'éxécution commande Schedule2_triggermode_off');
+        energysaver::ChangeScheduleTriggerMode('off', 2);      	
+      	break;
+      case 'Schedule2_triggermode_on': // LogicalId de la commande
+        log::add('energysaver', 'debug', 'éxécution commande Schedule2_triggermode_on');
+        energysaver::ChangeScheduleTriggerMode('on', 2);      	
+      	break;
+      case 'Schedule3_triggermode_off': // LogicalId de la commande
+        log::add('energysaver', 'debug', 'éxécution commande Schedule3_triggermode_off');
+        energysaver::ChangeScheduleTriggerMode('off', 3);      	
+      	break;
+      case 'Schedule3_triggermode_on': // LogicalId de la commande
+        log::add('energysaver', 'debug', 'éxécution commande Schedule3_triggermode_on');
+        energysaver::ChangeScheduleTriggerMode('on', 3);      	
+      	break;
       default:
         break;        
     }
