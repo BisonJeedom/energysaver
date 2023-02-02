@@ -20,6 +20,7 @@ require_once dirname(__FILE__) . '/../../../core/php/core.inc.php';
 // Fonction exécutée automatiquement après l'installation du plugin
 function energysaver_install() {
   energysaver::createMainEquipement();
+  energysaver::checkNewEligibleDevices();
 }
 
 // Fonction exécutée automatiquement après la mise à jour du plugin

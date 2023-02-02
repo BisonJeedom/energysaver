@@ -25,7 +25,7 @@ if (!isConnect('admin')) {
 <div class="col-md-12">
     <div class="panel panel-primary">
         <div class="panel-heading">
-            <h3 class="panel-title"><center>Equipements elligibles car des commandes On et Off ont été trouvés</center>
+            <h3 class="panel-title"><center>Equipements eligibles car des commandes On et Off ont été trouvées</center>
               <a id="btSave" class="btn btn-success btn-xs pull-right" style="top: -2px !important; right: -6px !important;"><i class="far fa-check-circle icon-white"></i> {{Sauvegarder}}</a>
             </h3>
   			<h3 class="panel-title">
@@ -68,7 +68,13 @@ if (!isConnect('admin')) {
                 </thead>
                 <tbody>
 				<?php
-				//energysaver::createMainEquipement(); Temporaire pour test
+				/*
+              	energysaver::createMainEquipement(); Temporaire pour test
+
+                $eqLogicMain = eqLogic::byLogicalId('main', 'energysaver');
+			    $eqLogicMain->setConfiguration("json_array_known_devices", "");
+				$eqLogicMain->save();
+                */
 
               	log::add('energysaver', 'debug', '-- Recherche des équipements eligibles (START) --');
   				$num = 1;
