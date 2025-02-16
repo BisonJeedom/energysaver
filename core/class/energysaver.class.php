@@ -187,7 +187,7 @@ class energysaver extends eqLogic {
     if (!is_object($cmd) || $cmd->getIsHistorized() == 0) {
       return 0;
     }
-    $histories = $cmd->getHistory();
+    $histories[] = $cmd->getHistory();
     if (count($histories) == 0) {
       return 0;
     } else {
