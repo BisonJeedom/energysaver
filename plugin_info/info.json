@@ -1,26 +1,33 @@
 {
-	"id" : "energysaver",
-	"name" : "Energy Saver",
-	"description" : {
+	"id": "energysaver",
+	"name": "Energy Saver",
+	"description": {
 		"fr_FR": "Ce plugin permet d'aider à stopper certains équipements de votre installation Jeedom durant une fourchette horaire afin d'économiser de l'énergie"
 	},
-	"licence" : "AGPL",
-	"author" : "Bison",
-	"require" : "4.1.20",
-	"category" : "energy",
-	"hasDependency" : false,
-	"hasOwnDeamon" : false,
-	"maxDependancyInstallTime" : 0,
-	"changelog" : "https://github.com/BisonJeedom/documentations/blob/main/energysaver/changelog_beta.md",
-	"documentation" : "https://github.com/BisonJeedom/documentations/blob/main/energysaver/index_beta.md",
-	"changelog_beta" : "https://github.com/BisonJeedom/documentations/blob/main/energysaver/changelog_beta.md",
-	"documentation_beta" : "https://github.com/BisonJeedom/documentations/blob/main/energysaver/index_beta.md",
-	"link" : {
-		"forum":"",
-		"video" : ""
+	"licence": "AGPL",
+	"author": "Bison",
+	"require": "4.1.20",
+	"category": "energy",
+	"hasDependency": false,
+	"hasOwnDeamon": false,
+	"maxDependancyInstallTime": 0,
+	"changelog": "https://github.com/BisonJeedom/documentations/blob/main/energysaver/changelog_stable.md",
+	"documentation": "https://github.com/BisonJeedom/documentations/blob/main/energysaver/index_stable.md",
+	"changelog_beta": "https://github.com/BisonJeedom/documentations/blob/main/energysaver/changelog_beta.md",
+	"documentation_beta": "https://github.com/BisonJeedom/documentations/blob/main/energysaver/index_beta.md",
+	"link": {
+		"forum": "",
+		"video": ""
 	},
 	"language": [
 		"fr_FR"
 	],
-	"compatibility": ["smart", "rpi", "docker", "diy", "v4", "atlas"]
+	"compatibility": [
+		"smart",
+		"rpi",
+		"docker",
+		"diy",
+		"v4",
+		"atlas"
+	]
 }
